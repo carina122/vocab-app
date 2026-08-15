@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study — WordBox</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="tabnav">
+  <div class="brand">Word<span class="dot">Box</span></div>
+  <div class="tab-list">
+    <a href="index.html">Home</a>
+    <a href="library.html">My Decks</a>
+    <a href="flashcards.html">Study</a>
+    <a href="upload.html">Upload</a>
+    <a href="stats.html">Progress</a>
+    <a href="login.html">Profile</a>
+  </div>
+</nav>
+
+<div class="wrap-narrow">
+  <span class="eyebrow" id="deckLabel">loading deck…</span>
+  <h1 id="deckName" style="font-size:2rem;">Study</h1>
+
+  <div class="stat-row" style="grid-template-columns:repeat(3,1fr); max-width:420px; margin:0 auto 1rem;">
+    <div class="stat-card" style="text-align:center;"><div class="num mono" id="idxNow">1</div><div class="label">Card</div></div>
+    <div class="stat-card" style="text-align:center;"><div class="num mono" id="idxKnown" style="color:var(--sage-dark);">0</div><div class="label">Known</div></div>
+    <div class="stat-card" style="text-align:center;"><div class="num mono" id="idxLearning" style="color:var(--coral-dark);">0</div><div class="label">Learning</div></div>
+  </div>
+
+  <div class="card-stage deck-shadow">
+    <div class="flashcard" id="card" tabindex="0" role="button" aria-label="Flip card">
+      <div class="face front">
+        <span class="term" id="termText">—</span>
+        <span class="sub" id="deckTag"></span>
+        <span class="hint">click or press space to flip</span>
+      </div>
+      <div class="face back">
+        <span class="term" id="translationText" style="font-size:1.5rem;">—</span>
+        <span class="sub" id="exampleText"></span>
+        <span class="hint">click to flip back</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-row">
+    <button class="btn btn-ghost" id="prevBtn">← Prev</button>
+    <button class="btn btn-primary" id="learningBtn">Still learning</button>
+    <button class="btn btn-sage" id="knownBtn">Known ✓</button>
+    <button class="btn btn-ghost" id="nextBtn">Next →</button>
+  </div>
+
+  <div id="doneState" class="empty-state" style="display:none; margin-top:2rem;">
+    <h3>Deck complete 🎉</h3>
+    <p>You reviewed every card in this deck.</p>
+    <a href="library.html" class="btn btn-primary">Back to My Decks</a>
+  </div>
+</div>
+
+<footer>WordBox · progress is saved via <span class="mono">POST /api/decks/:id/cards/:id/review</span></footer>
+
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+(async function () {
+  const params = new URLSearchParams(location.search);
+  const deckId = params.get('deck') || 'sample';
+
+  const card = document.getElementById('card');
+  const termText = document.getElementById('termText');
+  const translationText = document.getElementById('translationText');
+  const exampleText = document.getElementById('exampleText');
+  const deckTag = document.getElementById('deckTag');
+  const deckLabel = document.getElementById('deckLabel');
+  const deckNameEl = document.getElementById('deckName');
+  const idxNow = document.getElementById('idxNow');
+  const idxKnown = document.getElementById('idxKnown');
+  const idxLearning = document.getElementById('idxLearning');
+  const doneState = document.getElementById('doneState');
+  const controls = document.querySelector('.controls-row');
+
+  let deck, cards = [], i = 0, known = 0, learning = 0;
+
+  async function loadDeck() {
+    if (deckId === 'sample') {
+      deck = WordBoxApp.SAMPLE_DECK;
+      return;
+    }
+    try {
+      deck = await WordBoxAPI.getDeck(deckId);
+    } catch (e) {
+      WordBoxApp.showToast('Could not reach backend — showing sample deck instead');
+      deck = WordBoxApp.SAMPLE_DECK;
+    }
+  }
+
+  function render() {
+    if (i >= cards.length) {
+      document.querySelector('.card-stage').style.display = 'none';
+      controls.style.display = 'none';
+      doneState.style.display = 'block';
+      return;
+    }
+    const c = cards[i];
+    card.classList.remove('flipped');
+    termText.textContent = c.term;
+    translationText.textContent = c.translation;
+    exampleText.textContent = c.example || '';
+    deckTag.textContent = deck.language || '';
+    idxNow.textContent = `${i + 1} / ${cards.length}`;
+  }
+
+  function flip() { card.classList.toggle('flipped'); }
+
+  async function mark(result) {
+    const c = cards[i];
+    if (result === 'known') { known++; idxKnown.textContent = known; }
+    else { learning++; idxLearning.textContent = learning; }
+    try {
+      if (deckId !== 'sample') await WordBoxAPI.reviewCard(deckId, c.id, result);
+    } catch (e) { /* offline demo — ignore */ }
+    i++;
+    render();
+  }
+
+  card.addEventListener('click', flip);
+  card.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); flip(); } });
+  document.getElementById('knownBtn').addEventListener('click', () => mark('known'));
+  document.getElementById('learningBtn').addEventListener('click', () => mark('learning'));
+  document.getElementById('nextBtn').addEventListener('click', () => { i = Math.min(i + 1, cards.length); render(); });
+  document.getElementById('prevBtn').addEventListener('click', () => { i = Math.max(i - 1, 0); render(); });
+
+  await loadDeck();
+  cards = deck.cards || [];
+  deckLabel.textContent = `Studying · ${cards.length} cards`;
+  deckNameEl.textContent = deck.name;
+  render();
+})();
+</script>
+</body>
+</html>

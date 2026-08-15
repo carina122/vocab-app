@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordbox-frontend
+  namespace: wordbox
+  labels: { app: wordbox-frontend }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: wordbox-frontend }
+  template:
+    metadata:
+      labels: { app: wordbox-frontend }
+    spec:
+      containers:
+        - name: wordbox-frontend
+          image: wordboxacr4823h.azurecr.io/wordbox-frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits:   { cpu: "250m", memory: "128Mi" }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordbox-frontend
+  namespace: wordbox
+spec:
+  selector: { app: wordbox-frontend }
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

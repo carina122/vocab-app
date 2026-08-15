@@ -1,0 +1,7 @@
+{
+  "name": "wordbox-serverless",
+  "version": "1.0.0",
+  "description": "WordBox serverless component — Blob-triggered Azure Function that parses uploaded vocab files into decks",
+  "scripts": { "start": "func start" },
+  "dependencies": {}
+}

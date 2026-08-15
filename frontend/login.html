@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — WordBox</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="tabnav">
+  <div class="brand">Word<span class="dot">Box</span></div>
+  <div class="tab-list">
+    <a href="index.html">Home</a>
+    <a href="library.html">My Decks</a>
+    <a href="flashcards.html">Study</a>
+    <a href="upload.html">Upload</a>
+    <a href="stats.html">Progress</a>
+    <a href="login.html">Profile</a>
+  </div>
+</nav>
+
+<div class="wrap-narrow">
+  <span class="eyebrow">Sign in</span>
+  <h1>Your profile</h1>
+  <p style="color:var(--ink-soft);">Sign in to sync decks across devices. (Demo form — wire up to your auth provider of choice, e.g. Azure AD B2C, alongside the backend API.)</p>
+
+  <form id="loginForm">
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" required>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+    </div>
+    <div class="controls-row" style="justify-content:flex-start;">
+      <button type="submit" class="btn btn-primary">Sign in</button>
+      <button type="button" class="btn btn-ghost" id="guestBtn">Continue as guest</button>
+    </div>
+  </form>
+</div>
+
+<footer>WordBox · auth is a stub in this demo build</footer>
+
+<script src="js/app.js"></script>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    WordBoxApp.showToast('Demo build — connect this form to your identity provider');
+  });
+  document.getElementById('guestBtn').addEventListener('click', () => {
+    location.href = 'library.html';
+  });
+</script>
+</body>
+</html>

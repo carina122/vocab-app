@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  wordbox-backend:
+    build: ./backend
+    container_name: wordbox-backend
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      # Leave unset to use the in-memory dev fallback, or point at a real
+      # Azure Storage account / Azurite emulator connection string.
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING:-}
+      AZURE_CONTAINER_DECKS: wordbox-decks
+      AZURE_CONTAINER_UPLOADS: wordbox-uploads
+      CORS_ORIGIN: "*"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:4000/healthz"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+
+  wordbox-frontend:
+    build: ./frontend
+    container_name: wordbox-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - wordbox-backend
+    # nginx.conf proxies /api to the backend container by its compose service name

@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "name": "uploadBlob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "wordbox-uploads/{name}",
+      "connection": "AZURE_STORAGE_CONNECTION_STRING"
+    },
+    {
+      "name": "deckOut",
+      "type": "blob",
+      "direction": "out",
+      "path": "wordbox-decks/{rand-guid}.json",
+      "connection": "AZURE_STORAGE_CONNECTION_STRING"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+# Requires an ingress controller in AKS, e.g.:
+#   helm install nginx-ingress ingress-nginx/ingress-nginx -n wordbox
+# and cert-manager if you want managed TLS.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wordbox-ingress
+  namespace: wordbox
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: ["wordbox.example.com"]
+      secretName: wordbox-tls
+  rules:
+    - host: wordbox.example.com
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: wordbox-backend
+                port: { number: 4000 }
+          - path: /(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: wordbox-frontend
+                port: { number: 80 }

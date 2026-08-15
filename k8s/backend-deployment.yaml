@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordbox-backend
+  namespace: wordbox
+  labels: { app: wordbox-backend }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: wordbox-backend }
+  template:
+    metadata:
+      labels: { app: wordbox-backend }
+    spec:
+      containers:
+        - name: wordbox-backend
+          # Built & pushed to Azure Container Registry, e.g.:
+          # <acrname>.azurecr.io/wordbox-backend:latest
+          image: wordboxacr4823h.azurecr.io/wordbox-backend:latest
+          ports:
+            - containerPort: 4000
+          env:
+            - name: PORT
+              value: "4000"
+            - name: AZURE_CONTAINER_DECKS
+              value: "wordbox-decks"
+            - name: AZURE_CONTAINER_UPLOADS
+              value: "wordbox-uploads"
+            - name: CORS_ORIGIN
+              value: "*"
+            - name: AZURE_STORAGE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: wordbox-backend-secret
+                  key: AZURE_STORAGE_CONNECTION_STRING
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "256Mi" }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 4000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 4000 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordbox-backend
+  namespace: wordbox
+spec:
+  selector: { app: wordbox-backend }
+  ports:
+    - port: 4000
+      targetPort: 4000
+  type: ClusterIP

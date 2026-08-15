@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progress — WordBox</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="tabnav">
+  <div class="brand">Word<span class="dot">Box</span></div>
+  <div class="tab-list">
+    <a href="index.html">Home</a>
+    <a href="library.html">My Decks</a>
+    <a href="flashcards.html">Study</a>
+    <a href="upload.html">Upload</a>
+    <a href="stats.html">Progress</a>
+    <a href="login.html">Profile</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <span class="eyebrow">Reviews are logged as you study</span>
+  <h1 style="font-size:2.2rem;">Progress</h1>
+
+  <div class="stat-row" id="statRow">
+    <div class="stat-card"><div class="num">—</div><div class="label">Cards reviewed</div></div>
+    <div class="stat-card"><div class="num">—</div><div class="label">Known</div></div>
+    <div class="stat-card"><div class="num">—</div><div class="label">Still learning</div></div>
+    <div class="stat-card"><div class="num">—</div><div class="label">Day streak</div></div>
+  </div>
+
+  <h3 style="margin-top:2rem;">Mastery by deck</h3>
+  <div id="byDeck" style="margin-top:1rem;"></div>
+</div>
+
+<footer>WordBox · <span class="mono">GET /api/stats</span></footer>
+
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+(async function () {
+  const statRow = document.getElementById('statRow');
+  const byDeck = document.getElementById('byDeck');
+  let stats;
+  try {
+    stats = await WordBoxAPI.getStats();
+  } catch (e) {
+    WordBoxApp.showToast('Backend unreachable — showing placeholder progress');
+    stats = {
+      totalReviewed: 5, known: 3, learning: 2, streakDays: 1,
+      byDeck: [{ name: WordBoxApp.SAMPLE_DECK.name, known: 3, total: 5 }],
+    };
+  }
+
+  statRow.innerHTML = `
+    <div class="stat-card"><div class="num">${stats.totalReviewed}</div><div class="label">Cards reviewed</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--sage-dark);">${stats.known}</div><div class="label">Known</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--coral-dark);">${stats.learning}</div><div class="label">Still learning</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--gold);">${stats.streakDays}</div><div class="label">Day streak</div></div>
+  `;
+
+  byDeck.innerHTML = (stats.byDeck || []).map(d => {
+    const pct = d.total ? Math.round((d.known / d.total) * 100) : 0;
+    return `
+      <div class="bar-row">
+        <div class="name">${d.name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="mono" style="width:44px; text-align:right; font-size:.8rem;">${pct}%</div>
+      </div>`;
+  }).join('') || '<p style="color:var(--ink-soft);">No reviews logged yet.</p>';
+})();
+</script>
+</body>
+</html>
