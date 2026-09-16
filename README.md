@@ -20,7 +20,7 @@ Features
   WordBox is a vocabulary-learning web application that allows users to create, study, and track progress on flashcard decks. The app features a clean, intuitive interface with six main pages: Home, My Decks, Study, Upload, Progress, and Profile.
 
 Live URLs
-  Frontend Application	http://72.144.95.243
+  Frontend Application	http://48.201.68.211
   Backend API	http://20.170.98.228:4000
   Health Check	http://20.170.98.228:4000/healthz
   Function App	https://wordbox-vocab-processor.azurewebsites.net
