@@ -1,5 +1,6 @@
 📚 WordBox - Vocabulary Flashcards
-  A containerized vocabulary-learning web app deployed on Azure using microservices architecture, serverless computing, and blob storage.
+
+A containerized vocabulary-learning web app deployed on Azure using microservices architecture, serverless computing, and blob storage.
 
 Features
   ✅ Create and manage vocabulary decks
